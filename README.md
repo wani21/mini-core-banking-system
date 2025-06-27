@@ -1,73 +1,141 @@
-# Welcome to your Lovable project
 
-## Project info
+# Core Banking System
 
-**URL**: https://lovable.dev/projects/6e38d985-e0a9-437b-b9e2-bc3772ea970b
+A comprehensive Core Banking System built with Java Spring Boot, featuring role-based authentication, KYC management, transaction processing, and more.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- **Role-based Authentication**: Admin and Customer roles with JWT token-based security
+- **KYC Management**: Customer onboarding and document verification
+- **Account Management**: Savings, Current, and Fixed Deposit accounts
+- **Transaction Processing**: Deposits, withdrawals, and fund transfers
+- **Interest Calculation**: Automated interest calculation for savings and fixed deposits
+- **Reporting**: Transaction history, account statements, and passbook generation
+- **Audit Trail**: Comprehensive logging and audit functionality
 
-**Use Lovable**
+## Technology Stack
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/6e38d985-e0a9-437b-b9e2-bc3772ea970b) and start prompting.
+- **Backend**: Java 17, Spring Boot 3.2+
+- **Database**: MySQL 8.0+
+- **Security**: Spring Security with JWT
+- **ORM**: Hibernate/JPA
+- **Migration**: Flyway
+- **Build Tool**: Maven
+- **Logging**: SLF4J with Logback
 
-Changes made via Lovable will be committed automatically to this repo.
+## Prerequisites
 
-**Use your preferred IDE**
+- Java 17 or higher
+- Maven 3.6+
+- MySQL 8.0+
+- IDE (IntelliJ IDEA, Eclipse, VS Code)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Getting Started
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### 1. Clone the Repository
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```bash
+git clone <repository-url>
+cd core-banking-system
 ```
 
-**Edit a file directly in GitHub**
+### 2. Database Setup
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```sql
+CREATE DATABASE core_banking_db;
+CREATE USER 'banking_user'@'localhost' IDENTIFIED BY 'banking_password';
+GRANT ALL PRIVILEGES ON core_banking_db.* TO 'banking_user'@'localhost';
+FLUSH PRIVILEGES;
+```
 
-**Use GitHub Codespaces**
+### 3. Configuration
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Update `src/main/resources/application.yml` with your database credentials:
 
-## What technologies are used for this project?
+```yaml
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/core_banking_db
+    username: banking_user
+    password: banking_password
+```
 
-This project is built with:
+### 4. Build and Run
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```bash
+# Build the project
+mvn clean compile
 
-## How can I deploy this project?
+# Run the application
+mvn spring-boot:run
+```
 
-Simply open [Lovable](https://lovable.dev/projects/6e38d985-e0a9-437b-b9e2-bc3772ea970b) and click on Share -> Publish.
+The application will start on `http://localhost:8080`
 
-## Can I connect a custom domain to my Lovable project?
+## API Endpoints
 
-Yes, you can!
+### Authentication
+- `POST /api/auth/login` - User login
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/logout` - User logout
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Health Check
+- `GET /actuator/health` - Application health status
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## Project Structure
+
+```
+src/
+├── main/
+│   ├── java/com/corebanking/
+│   │   ├── config/          # Configuration classes
+│   │   ├── security/        # Security components
+│   │   ├── common/          # Common utilities and base classes
+│   │   ├── exception/       # Exception handling
+│   │   └── CoreBankingApplication.java
+│   └── resources/
+│       ├── db/migration/    # Database migration scripts
+│       ├── application.yml  # Main configuration
+│       └── logback-spring.xml # Logging configuration
+```
+
+## Development Phases
+
+This project follows a structured development approach:
+
+1. **Phase 1**: Project Setup & Architecture ✅
+2. **Phase 2**: Database Design & Core Entities
+3. **Phase 3**: Authentication & Authorization
+4. **Phase 4**: KYC & Account Management
+5. **Phase 5**: Core Banking Operations
+6. **Phase 6**: Savings & Fixed Deposit Management
+7. **Phase 7**: Reporting & Analytics
+8. **Phase 8**: API Development & Integration
+9. **Phase 9**: Testing & Quality Assurance
+10. **Phase 10**: Deployment & Monitoring
+
+## Default Credentials
+
+- **Admin**: username: `admin`, password: `admin123`
+- **Customer**: username: `customer1`, password: `customer123`
+
+## Environment Profiles
+
+- **Development**: `application-dev.yml`
+- **Production**: `application-prod.yml`
+
+Run with specific profile:
+```bash
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+## Contributing
+
+1. Follow the existing code structure and naming conventions
+2. Write unit tests for new features
+3. Update documentation for any new endpoints or features
+4. Follow the phase-wise development approach
+
+## License
+
+This project is licensed under the MIT License.
