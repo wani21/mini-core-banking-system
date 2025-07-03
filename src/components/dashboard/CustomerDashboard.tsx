@@ -1,67 +1,74 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
-import { User, FileCheck, AlertCircle, CheckCircle } from 'lucide-react';
+import { User, CreditCard, FileText, LogOut, Settings } from 'lucide-react';
 import CustomerProfileForm from './CustomerProfileForm';
+import BankingDashboard from '../banking/BankingDashboard';
+import { useToast } from '@/hooks/use-toast';
 
-interface CustomerProfile {
-  customerId: number;
-  firstName: string;
-  lastName: string;
-  dateOfBirth: string;
-  gender: string;
-  phoneNumber: string;
-  addressLine1: string;
-  addressLine2?: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  country: string;
-  kycStatus: string;
+interface User {
+  username: string;
+  email: string;
+  role: string;
 }
 
 interface CustomerDashboardProps {
-  user: any;
+  user: User;
   onLogout: () => void;
 }
 
-const CustomerDashboard = ({ user, onLogout }: CustomerDashboardProps) => {
-  const [profile, setProfile] = useState<CustomerProfile | null>(null);
-  const [showProfileForm, setShowProfileForm] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ user, onLogout }) => {
+  const [activeTab, setActiveTab] = useState('overview');
+  const [customerProfile, setCustomerProfile] = useState<any>(null);
+  const [accounts, setAccounts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchProfile();
+    fetchCustomerProfile();
+    fetchAccounts();
   }, []);
 
-  const fetchProfile = async () => {
+  const fetchCustomerProfile = async () => {
     try {
       const token = localStorage.getItem('token');
       const response = await fetch('/api/customer/profile', {
         headers: {
           'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
       });
 
       if (response.ok) {
-        const profileData = await response.json();
-        setProfile(profileData);
-      } else if (response.status === 400) {
-        // No profile exists yet
-        setShowProfileForm(true);
+        const data = await response.json();
+        setCustomerProfile(data);
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch profile",
-        variant: "destructive",
+      console.error('Failed to fetch customer profile:', error);
+    }
+  };
+
+  const fetchAccounts = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/account/my-accounts', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
       });
+
+      if (response.ok) {
+        const data = await response.json();
+        setAccounts(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch accounts:', error);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -71,33 +78,26 @@ const CustomerDashboard = ({ user, onLogout }: CustomerDashboardProps) => {
     onLogout();
   };
 
-  const getKycStatusIcon = (status: string) => {
+  const getKycStatusColor = (status: string) => {
     switch (status) {
-      case 'COMPLETED':
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case 'APPROVED':
+        return 'bg-green-100 text-green-800';
+      case 'PENDING':
+        return 'bg-yellow-100 text-yellow-800';
       case 'IN_PROGRESS':
-        return <AlertCircle className="w-4 h-4 text-yellow-500" />;
+        return 'bg-blue-100 text-blue-800';
       case 'REJECTED':
-        return <AlertCircle className="w-4 h-4 text-red-500" />;
+        return 'bg-red-100 text-red-800';
       default:
-        return <FileCheck className="w-4 h-4 text-gray-500" />;
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getKycStatusVariant = (status: string) => {
-    switch (status) {
-      case 'COMPLETED':
-        return 'default';
-      case 'IN_PROGRESS':
-        return 'secondary';
-      case 'REJECTED':
-        return 'destructive';
-      default:
-        return 'outline';
-    }
+  const getTotalBalance = () => {
+    return accounts.reduce((total, account) => total + account.balance, 0);
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -108,111 +108,164 @@ const CustomerDashboard = ({ user, onLogout }: CustomerDashboardProps) => {
     );
   }
 
-  if (showProfileForm || !profile) {
-    return (
-      <CustomerProfileForm 
-        onProfileCreated={(newProfile) => {
-          setProfile(newProfile);
-          setShowProfileForm(false);
-          toast({
-            title: "Profile Created",
-            description: "Your customer profile has been created successfully!",
-          });
-        }}
-        user={user}
-        onLogout={handleLogout}
-      />
-    );
-  }
-
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Customer Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back, {user.username}</p>
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Core Banking System</h1>
+              <p className="text-sm text-gray-600">Welcome back, {user.username}</p>
+            </div>
+            <div className="flex items-center gap-4">
+              <Badge variant="secondary">{user.role}</Badge>
+              <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
+                <LogOut className="h-4 w-4" />
+                Logout
+              </Button>
+            </div>
+          </div>
         </div>
-        <Button onClick={handleLogout} variant="outline">Logout</Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="w-5 h-5" />
-              Personal Information
-            </CardTitle>
-            <CardDescription>Your registered details</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div>
-              <p className="font-semibold">Name</p>
-              <p className="text-muted-foreground">{profile.firstName} {profile.lastName}</p>
-            </div>
-            <div>
-              <p className="font-semibold">Email</p>
-              <p className="text-muted-foreground">{user.email}</p>
-            </div>
-            <div>
-              <p className="font-semibold">Phone</p>
-              <p className="text-muted-foreground">{profile.phoneNumber}</p>
-            </div>
-            <div>
-              <p className="font-semibold">Date of Birth</p>
-              <p className="text-muted-foreground">{profile.dateOfBirth}</p>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="overview" className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="banking" className="flex items-center gap-2">
+              <CreditCard className="h-4 w-4" />
+              Banking
+            </TabsTrigger>
+            <TabsTrigger value="profile" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Profile
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              Settings
+            </TabsTrigger>
+          </TabsList>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileCheck className="w-5 h-5" />
-              KYC Status
-            </CardTitle>
-            <CardDescription>Your verification status</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-2">
-              {getKycStatusIcon(profile.kycStatus)}
-              <Badge variant={getKycStatusVariant(profile.kycStatus)}>
-                {profile.kycStatus.replace('_', ' ')}
-              </Badge>
-            </div>
-            {profile.kycStatus === 'PENDING' && (
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">
-                  Your KYC verification is pending. Please upload your documents to complete the process.
-                </p>
-                <Button size="sm">Upload Documents</Button>
-              </div>
-            )}
-            {profile.kycStatus === 'IN_PROGRESS' && (
-              <p className="text-sm text-muted-foreground">
-                Your documents are being reviewed. We'll notify you once the verification is complete.
-              </p>
-            )}
-            {profile.kycStatus === 'COMPLETED' && (
-              <p className="text-sm text-green-600">
-                Your account is fully verified! You can now access all banking services.
-              </p>
-            )}
-          </CardContent>
-        </Card>
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Balance</CardTitle>
+                  <CreditCard className="h-4 w-4 text-blue-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">${getTotalBalance().toFixed(2)}</div>
+                  <p className="text-xs text-muted-foreground">
+                    Across {accounts.length} account{accounts.length !== 1 ? 's' : ''}
+                  </p>
+                </CardContent>
+              </Card>
 
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>Address Information</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <p>{profile.addressLine1}</p>
-              {profile.addressLine2 && <p>{profile.addressLine2}</p>}
-              <p>{profile.city}, {profile.state} {profile.postalCode}</p>
-              <p>{profile.country}</p>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">KYC Status</CardTitle>
+                  <FileText className="h-4 w-4 text-green-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-2">
+                    <Badge className={getKycStatusColor(customerProfile?.kycStatus || 'PENDING')}>
+                      {customerProfile?.kycStatus || 'PENDING'}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {customerProfile?.kycStatus === 'APPROVED' 
+                      ? 'All documents verified'
+                      : 'Complete your KYC to access all features'
+                    }
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Active Accounts</CardTitle>
+                  <CreditCard className="h-4 w-4 text-purple-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{accounts.filter(acc => acc.status === 'ACTIVE').length}</div>
+                  <p className="text-xs text-muted-foreground">
+                    {accounts.length} total accounts
+                  </p>
+                </CardContent>
+              </Card>
             </div>
-          </CardContent>
-        </Card>
+
+            {!customerProfile && (
+              <Card className="border-orange-200 bg-orange-50">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium text-orange-900">Complete Your Profile</h3>
+                      <p className="text-sm text-orange-700">
+                        Please complete your customer profile to access banking services.
+                      </p>
+                    </div>
+                    <Button onClick={() => setActiveTab('profile')} className="bg-orange-600 hover:bg-orange-700">
+                      Complete Profile
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {customerProfile && accounts.length === 0 && (
+              <Card className="border-blue-200 bg-blue-50">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium text-blue-900">Create Your First Account</h3>
+                      <p className="text-sm text-blue-700">
+                        Get started by creating your first banking account.
+                      </p>
+                    </div>
+                    <Button onClick={() => setActiveTab('banking')} className="bg-blue-600 hover:bg-blue-700">
+                      Create Account
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="banking">
+            <BankingDashboard />
+          </TabsContent>
+
+          <TabsContent value="profile">
+            <CustomerProfileForm />
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <Card>
+              <CardHeader>
+                <CardTitle>Account Settings</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-medium">Account Information</h3>
+                    <p className="text-sm text-muted-foreground">Username: {user.username}</p>
+                    <p className="text-sm text-muted-foreground">Email: {user.email}</p>
+                    <p className="text-sm text-muted-foreground">Role: {user.role}</p>
+                  </div>
+                  <div className="pt-4 border-t">
+                    <Button variant="destructive" onClick={handleLogout}>
+                      Logout
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
