@@ -1,8 +1,8 @@
 
-import WorkflowPhases from '@/components/WorkflowPhases';
+import BankingApp from '@/components/BankingApp';
 
 const Index = () => {
-  return <WorkflowPhases />;
+  return <BankingApp />;
 };
 
 export default Index;
