@@ -78,6 +78,15 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ user, onLogout })
     onLogout();
   };
 
+  const handleProfileCreated = (profile: any) => {
+    setCustomerProfile(profile);
+    setActiveTab('overview');
+    toast({
+      title: "Profile Created",
+      description: "Your customer profile has been created successfully.",
+    });
+  };
+
   const getKycStatusColor = (status: string) => {
     switch (status) {
       case 'APPROVED':
@@ -240,7 +249,11 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ user, onLogout })
           </TabsContent>
 
           <TabsContent value="profile">
-            <CustomerProfileForm />
+            <CustomerProfileForm 
+              onProfileCreated={handleProfileCreated}
+              user={user}
+              onLogout={onLogout}
+            />
           </TabsContent>
 
           <TabsContent value="settings">
