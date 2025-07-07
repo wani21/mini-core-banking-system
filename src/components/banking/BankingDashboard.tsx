@@ -1,11 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import AccountsList from './AccountsList';
 import CreateAccountForm from './CreateAccountForm';
 import TransactionForm from './TransactionForm';
 import TransactionHistory from './TransactionHistory';
+import SavingsOverview from './SavingsOverview';
 import { Button } from '@/components/ui/button';
-import { ArrowLeftRight, History, Plus } from 'lucide-react';
+import { ArrowLeftRight, History, Plus, PiggyBank } from 'lucide-react';
 
 interface Account {
   accountId: number;
@@ -17,7 +17,7 @@ interface Account {
 }
 
 const BankingDashboard: React.FC = () => {
-  const [currentView, setCurrentView] = useState<'accounts' | 'create-account' | 'transaction' | 'history'>('accounts');
+  const [currentView, setCurrentView] = useState<'accounts' | 'create-account' | 'transaction' | 'history' | 'savings'>('accounts');
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -48,6 +48,10 @@ const BankingDashboard: React.FC = () => {
   const handleBackToAccounts = () => {
     setCurrentView('accounts');
     setSelectedAccount(null);
+  };
+
+  const handleViewSavings = () => {
+    setCurrentView('savings');
   };
 
   const fetchAccounts = async () => {
@@ -83,6 +87,10 @@ const BankingDashboard: React.FC = () => {
             <div className="flex justify-between items-center">
               <h1 className="text-3xl font-bold">Banking Dashboard</h1>
               <div className="flex gap-2">
+                <Button onClick={handleViewSavings} variant="outline" className="flex items-center gap-2">
+                  <PiggyBank className="h-4 w-4" />
+                  Savings & FD
+                </Button>
                 <Button onClick={handleNewTransaction} className="flex items-center gap-2">
                   <ArrowLeftRight className="h-4 w-4" />
                   New Transaction
@@ -123,6 +131,18 @@ const BankingDashboard: React.FC = () => {
             account={selectedAccount}
             onBack={handleBackToAccounts}
           />
+        )}
+
+        {currentView === 'savings' && (
+          <div className="space-y-6">
+            <div className="flex items-center gap-4">
+              <Button variant="outline" onClick={handleBackToAccounts}>
+                ← Back to Accounts
+              </Button>
+              <h1 className="text-3xl font-bold">Savings & Fixed Deposits</h1>
+            </div>
+            <SavingsOverview />
+          </div>
         )}
       </div>
     </div>
