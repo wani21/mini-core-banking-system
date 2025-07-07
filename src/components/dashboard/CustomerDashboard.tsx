@@ -1,12 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { User, CreditCard, FileText, LogOut, Settings } from 'lucide-react';
+import { User, CreditCard, FileText, LogOut, Settings, BarChart3, Shield } from 'lucide-react';
 import CustomerProfileForm from './CustomerProfileForm';
 import BankingDashboard from '../banking/BankingDashboard';
+import ReportsOverview from '../reports/ReportsOverview';
+import SecuritySettings from '../security/SecuritySettings';
 import { useToast } from '@/hooks/use-toast';
 
 interface User {
@@ -139,7 +140,7 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ user, onLogout })
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <User className="h-4 w-4" />
               Overview
@@ -151,6 +152,14 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ user, onLogout })
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               Profile
+            </TabsTrigger>
+            <TabsTrigger value="reports" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Reports
+            </TabsTrigger>
+            <TabsTrigger value="security" className="flex items-center gap-2">
+              <Shield className="h-4 w-4" />
+              Security
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
@@ -254,6 +263,14 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ user, onLogout })
               user={user}
               onLogout={onLogout}
             />
+          </TabsContent>
+
+          <TabsContent value="reports">
+            <ReportsOverview />
+          </TabsContent>
+
+          <TabsContent value="security">
+            <SecuritySettings />
           </TabsContent>
 
           <TabsContent value="settings">
