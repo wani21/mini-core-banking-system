@@ -43,12 +43,28 @@ public class ReportService {
     public Map<String, Object> getTransactionStats(LocalDateTime startDate, LocalDateTime endDate) {
         Map<String, Object> stats = new HashMap<>();
         
-        // This would need a custom query in a real implementation
-        // For now, we'll return mock data structure
-        stats.put("totalTransactions", 0);
-        stats.put("totalDeposits", BigDecimal.ZERO);
-        stats.put("totalWithdrawals", BigDecimal.ZERO);
-        stats.put("totalTransfers", BigDecimal.ZERO);
+        List<Transaction> transactions = transactionRepository.findByTransactionDateBetween(startDate, endDate);
+        
+        long totalTransactions = transactions.size();
+        BigDecimal totalDeposits = transactions.stream()
+                .filter(t -> t.getTransactionType() == TransactionType.DEPOSIT)
+                .map(Transaction::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                
+        BigDecimal totalWithdrawals = transactions.stream()
+                .filter(t -> t.getTransactionType() == TransactionType.WITHDRAWAL)
+                .map(Transaction::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                
+        BigDecimal totalTransfers = transactions.stream()
+                .filter(t -> t.getTransactionType() == TransactionType.TRANSFER)
+                .map(Transaction::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        stats.put("totalTransactions", totalTransactions);
+        stats.put("totalDeposits", totalDeposits);
+        stats.put("totalWithdrawals", totalWithdrawals);
+        stats.put("totalTransfers", totalTransfers);
         
         return stats;
     }
@@ -56,10 +72,29 @@ public class ReportService {
     public Map<String, BigDecimal> getMonthlyTransactionSummary(int year, int month) {
         Map<String, BigDecimal> summary = new HashMap<>();
         
-        // Mock implementation - in real scenario would query database
-        summary.put("deposits", BigDecimal.valueOf(10000));
-        summary.put("withdrawals", BigDecimal.valueOf(5000));
-        summary.put("transfers", BigDecimal.valueOf(15000));
+        LocalDateTime startDate = LocalDateTime.of(year, month, 1, 0, 0);
+        LocalDateTime endDate = startDate.plusMonths(1).minusDays(1).withHour(23).withMinute(59).withSecond(59);
+        
+        List<Transaction> monthlyTransactions = transactionRepository.findByTransactionDateBetween(startDate, endDate);
+        
+        BigDecimal deposits = monthlyTransactions.stream()
+                .filter(t -> t.getTransactionType() == TransactionType.DEPOSIT)
+                .map(Transaction::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                
+        BigDecimal withdrawals = monthlyTransactions.stream()
+                .filter(t -> t.getTransactionType() == TransactionType.WITHDRAWAL)
+                .map(Transaction::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                
+        BigDecimal transfers = monthlyTransactions.stream()
+                .filter(t -> t.getTransactionType() == TransactionType.TRANSFER)
+                .map(Transaction::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        summary.put("deposits", deposits);
+        summary.put("withdrawals", withdrawals);
+        summary.put("transfers", transfers);
         
         return summary;
     }

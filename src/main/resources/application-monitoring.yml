@@ -1,0 +1,53 @@
+# Monitoring and observability configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,loggers,configprops,env,beans,mappings
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5, 0.95, 0.99
+    tags:
+      application: core-banking-system
+      environment: ${spring.profiles.active:default}
+
+logging:
+  level:
+    com.corebanking: INFO
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+    org.springframework.web: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
+  file:
+    name: logs/core-banking-${spring.profiles.active:default}.log
+    max-size: 100MB
+    max-history: 30
+
+# Application info
+info:
+  app:
+    name: Core Banking System
+    description: Enterprise Core Banking Application
+    version: 1.0.0
+    java:
+      version: ${java.version}
+  build:
+    artifact: core-banking-system
+    group: com.corebanking

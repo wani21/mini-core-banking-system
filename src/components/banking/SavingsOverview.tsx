@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PiggyBank, TrendingUp, Calendar, DollarSign } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import FixedDepositForm from './FixedDepositForm';
 
 interface FixedDeposit {
   fdId: number;
@@ -97,9 +98,14 @@ const SavingsOverview: React.FC = () => {
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="create-fd">Create FD</TabsTrigger>
           <TabsTrigger value="fixed-deposits">Fixed Deposits</TabsTrigger>
           <TabsTrigger value="interest-history">Interest History</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="create-fd" className="space-y-4">
+          <FixedDepositForm accounts={[]} onSuccess={fetchSavingsData} />
+        </TabsContent>
 
         <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3">

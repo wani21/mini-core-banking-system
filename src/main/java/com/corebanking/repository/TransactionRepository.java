@@ -24,4 +24,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Transaction> findTransactionsByAccountAndDateRange(@Param("accountId") Long accountId, 
                                                            @Param("startDate") LocalDateTime startDate, 
                                                            @Param("endDate") LocalDateTime endDate);
+    
+    List<Transaction> findByTransactionDateBetween(LocalDateTime startDate, LocalDateTime endDate);
 }
