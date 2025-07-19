@@ -6,6 +6,8 @@ import com.corebanking.entity.Transaction;
 import com.corebanking.entity.TransactionType;
 import com.corebanking.repository.AccountRepository;
 import com.corebanking.repository.TransactionRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,8 @@ import java.util.Map;
 
 @Service
 public class ReportService {
+
+    private static final Logger logger = LoggerFactory.getLogger(ReportService.class);
 
     @Autowired
     private AccountRepository accountRepository;
